@@ -40,7 +40,7 @@ namespace pal
 
   class LabelPosition;
   class Layer;
-  class FeaturePart;
+  class LabelFeaturePart;
 
   /**
    * \ingroup core
@@ -53,7 +53,7 @@ namespace pal
       //! Constructor for Feats
       Feats() = default;
 
-      FeaturePart *feature = nullptr;
+      LabelFeaturePart *feature = nullptr;
       PointSet *shape = nullptr;
       double priority = 0;
       QList< LabelPosition *> lPos;

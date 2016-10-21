@@ -220,7 +220,7 @@ void QgsLabelingEngine::run( QgsRenderContext &context )
   p.setPolyP( candPolygon );
 
   p.setShowPartial( settings.testFlag( QgsLabelingEngineSettings::UsePartialCandidates ) );
-
+  p.setBlockingRegions( mMapSettings.labelBlockingRegions() );
 
   // for each provider: get labels and register them in PAL
   Q_FOREACH ( QgsAbstractLabelProvider *provider, mProviders )

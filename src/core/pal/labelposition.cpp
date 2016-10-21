@@ -40,7 +40,7 @@
 
 using namespace pal;
 
-LabelPosition::LabelPosition( int id, double x1, double y1, double w, double h, double alpha, double cost, FeaturePart *feature, bool isReversed, Quadrant quadrant )
+LabelPosition::LabelPosition( int id, double x1, double y1, double w, double h, double alpha, double cost, LabelFeaturePart *feature, bool isReversed, Quadrant quadrant )
   : id( id )
   , feature( feature )
   , probFeat( 0 )
@@ -363,7 +363,7 @@ void LabelPosition::validateCost()
   }
 }
 
-FeaturePart *LabelPosition::getFeaturePart()
+LabelFeaturePart * LabelPosition::getFeaturePart()
 {
   return feature;
 }
@@ -436,15 +436,18 @@ bool LabelPosition::pruneCallback( LabelPosition *candidatePosition, void *ctx )
 {
   FeaturePart *obstaclePart = ( reinterpret_cast< PruneCtx * >( ctx ) )->obstacle;
 
-  // test whether we should ignore this obstacle for the candidate. We do this if:
-  // 1. it's not a hole, and the obstacle belongs to the same label feature as the candidate (e.g.,
-  // features aren't obstacles for their own labels)
-  // 2. it IS a hole, and the hole belongs to a different label feature to the candidate (e.g., holes
-  // are ONLY obstacles for the labels of the feature they belong to)
-  if ( ( !obstaclePart->getHoleOf() && candidatePosition->feature->hasSameLabelFeatureAs( obstaclePart ) )
-       || ( obstaclePart->getHoleOf() && !candidatePosition->feature->hasSameLabelFeatureAs( dynamic_cast< FeaturePart * >( obstaclePart->getHoleOf() ) ) ) )
+  if ( LabelFeaturePart* labelobstacle = dynamic_cast< LabelFeaturePart* >( obstaclePart ) )
   {
-    return true;
+    // test whether we should ignore this obstacle for the candidate. We do this if:
+    // 1. it's not a hole, and the obstacle belongs to the same label feature as the candidate (eg
+    // features aren't obstacles for their own labels)
+    // 2. it IS a hole, and the hole belongs to a different label feature to the candidate (eg, holes
+    // are ONLY obstacles for the labels of the feature they belong to)
+    if (( !labelobstacle->getHoleOf() && candidatePosition->feature->hasSameLabelFeatureAs( labelobstacle ) )
+        || ( labelobstacle->getHoleOf() && !candidatePosition->feature->hasSameLabelFeatureAs( dynamic_cast< LabelFeaturePart* >( labelobstacle->getHoleOf() ) ) ) )
+    {
+      return true;
+    }
   }
 
   CostCalculator::addObstacleCostPenalty( candidatePosition, obstaclePart );

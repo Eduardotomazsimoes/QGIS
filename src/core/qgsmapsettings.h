@@ -32,12 +32,36 @@
 #include "qgsscalecalculator.h"
 #include "qgsexpressioncontext.h"
 #include "qgsmaplayer.h"
+#include "qgsgeometry.h"
 
 class QPainter;
 
 class QgsCoordinateTransform;
 class QgsScaleCalculator;
 class QgsMapRendererJob;
+
+/**
+ * \class QgsLabelBlockingRegion
+ * \ingroup core
+ *
+ * Label blocking region (in map coordinates) to blocking priority (0-10)
+ * @note added in 3.0
+*/
+class QgsLabelBlockingRegion
+{
+  public:
+    QgsLabelBlockingRegion( const QgsGeometry& geometry, double obstacleFactor )
+        : geometry( geometry )
+        , factor( obstacleFactor )
+    {}
+
+    //!
+    QgsGeometry geometry;
+
+    //!
+    double factor;
+
+};
 
 
 /**
@@ -280,6 +304,20 @@ class CORE_EXPORT QgsMapSettings
     QgsCoordinateTransformContext transformContext() const;
 
     /**
+     * Sets a list of \a regions to avoid placing labels within.
+     * \since QGIS 3.2
+     * \see labelBlockingRegions()
+     */
+    void setLabelBlockingRegions( const QList< QgsLabelBlockingRegion >& regions ) { mLabelBlockingRegions = regions; }
+
+    /**
+     * Returns the list of regions to avoid placing labels within.
+     * \since QGIS 3.2
+     * \see setLabelBlockingRegions()
+     */
+    QList< QgsLabelBlockingRegion > labelBlockingRegions() const { return mLabelBlockingRegions; }
+
+    /**
      * Sets the coordinate transform \a context, which stores various
      * information regarding which datum transforms should be used when transforming points
      * from a source to destination coordinate reference system.
@@ -451,6 +489,10 @@ class CORE_EXPORT QgsMapSettings
 #endif
 
     void updateDerived();
+
+  private:
+
+    QList< QgsLabelBlockingRegion > mLabelBlockingRegions;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS( QgsMapSettings::Flags )

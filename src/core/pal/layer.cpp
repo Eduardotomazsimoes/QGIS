@@ -56,8 +56,8 @@ Layer::Layer( QgsAbstractLabelProvider *provider, const QString &name, QgsPalLay
   , mMergeLines( false )
   , mUpsidedownLabels( Upright )
 {
-  mFeatureIndex = new RTree<FeaturePart *, double, 2, double>();
-  mObstacleIndex = new RTree<FeaturePart *, double, 2, double>();
+  mFeatureIndex = new RTree<LabelFeaturePart*, double, 2, double>();
+  mObstacleIndex = new RTree<LabelFeaturePart*, double, 2, double>();
 
   if ( defaultPriority < 0.0001 )
     mDefaultPriority = 0.0001;
@@ -116,7 +116,7 @@ bool Layer::registerFeature( QgsLabelFeature *lf )
   bool addedFeature = false;
 
   double geom_size = -1, biggest_size = -1;
-  FeaturePart *biggest_part = nullptr;
+  LabelFeaturePart* biggest_part = nullptr;
 
   // break the (possibly multi-part) geometry into simple geometries
   QLinkedList<const GEOSGeometry *> *simpleGeometries = Util::unmulti( lf->geometry() );
@@ -148,7 +148,7 @@ bool Layer::registerFeature( QgsLabelFeature *lf )
       throw InternalException::UnknownGeometry();
     }
 
-    FeaturePart *fpart = new FeaturePart( lf, geom );
+    LabelFeaturePart* fpart = new LabelFeaturePart( lf, geom );
 
     // ignore invalid geometries
     if ( ( type == GEOS_LINESTRING && fpart->nbPoints < 2 ) ||
@@ -174,7 +174,7 @@ bool Layer::registerFeature( QgsLabelFeature *lf )
       //unnecessary copy
       if ( mLabelLayer && labelWellDefined )
       {
-        addObstaclePart( new FeaturePart( *fpart ) );
+        addObstaclePart( new LabelFeaturePart( *fpart ) );
       }
       else
       {
@@ -245,7 +245,7 @@ bool Layer::registerFeature( QgsLabelFeature *lf )
         throw InternalException::UnknownGeometry();
       }
 
-      FeaturePart *fpart = new FeaturePart( lf, geom );
+      LabelFeaturePart* fpart = new LabelFeaturePart( lf, geom );
 
       // ignore invalid geometries
       if ( ( type == GEOS_LINESTRING && fpart->nbPoints < 2 ) ||
@@ -286,8 +286,7 @@ bool Layer::registerFeature( QgsLabelFeature *lf )
   return addedFeature; // true if we've added something
 }
 
-
-void Layer::addFeaturePart( FeaturePart *fpart, const QString &labelText )
+void Layer::addFeaturePart( LabelFeaturePart* fpart, const QString& labelText )
 {
   double bmin[2];
   double bmax[2];
@@ -302,11 +301,11 @@ void Layer::addFeaturePart( FeaturePart *fpart, const QString &labelText )
   // add to hashtable with equally named feature parts
   if ( mMergeLines && !labelText.isEmpty() )
   {
-    QLinkedList< FeaturePart *> *lst;
+    QLinkedList< LabelFeaturePart*>* lst;
     if ( !mConnectedHashtable.contains( labelText ) )
     {
       // entry doesn't exist yet
-      lst = new QLinkedList<FeaturePart *>;
+      lst = new QLinkedList<LabelFeaturePart*>;
       mConnectedHashtable.insert( labelText, lst );
       mConnectedTexts << labelText;
     }
@@ -318,7 +317,7 @@ void Layer::addFeaturePart( FeaturePart *fpart, const QString &labelText )
   }
 }
 
-void Layer::addObstaclePart( FeaturePart *fpart )
+void Layer::addObstaclePart( LabelFeaturePart* fpart )
 {
   double bmin[2];
   double bmax[2];
@@ -331,10 +330,10 @@ void Layer::addObstaclePart( FeaturePart *fpart )
   mObstacleIndex->Insert( bmin, bmax, fpart );
 }
 
-static FeaturePart *_findConnectedPart( FeaturePart *partCheck, QLinkedList<FeaturePart *> *otherParts )
+static LabelFeaturePart* _findConnectedPart( LabelFeaturePart* partCheck, QLinkedList<LabelFeaturePart*>* otherParts )
 {
   // iterate in the rest of the parts with the same label
-  QLinkedList<FeaturePart *>::const_iterator p = otherParts->constBegin();
+  QLinkedList<LabelFeaturePart*>::const_iterator p = otherParts->constBegin();
   while ( p != otherParts->constEnd() )
   {
     if ( partCheck->isConnected( *p ) )
@@ -359,15 +358,15 @@ void Layer::joinConnectedFeatures()
 
     connectedFeaturesId++;
 
-    QLinkedList<FeaturePart *> *parts = mConnectedHashtable.value( labelText );
+    QLinkedList<LabelFeaturePart*>* parts = mConnectedHashtable.value( labelText );
 
     // go one-by-one part, try to merge
     while ( !parts->isEmpty() && parts->count() > 1 )
     {
       // part we'll be checking against other in this round
-      FeaturePart *partCheck = parts->takeFirst();
+      LabelFeaturePart* partCheck = parts->takeFirst();
 
-      FeaturePart *otherPart = _findConnectedPart( partCheck, parts );
+      LabelFeaturePart* otherPart = _findConnectedPart( partCheck, parts );
       if ( otherPart )
       {
         // remove partCheck from r-tree
@@ -419,11 +418,11 @@ int Layer::connectedFeatureId( QgsFeatureId featureId ) const
 void Layer::chopFeaturesAtRepeatDistance()
 {
   GEOSContextHandle_t geosctxt = geosContext();
-  QLinkedList<FeaturePart *> newFeatureParts;
+  QLinkedList<LabelFeaturePart*> newFeatureParts;
   while ( !mFeatureParts.isEmpty() )
   {
-    FeaturePart *fpart = mFeatureParts.takeFirst();
-    const GEOSGeometry *geom = fpart->geos();
+    LabelFeaturePart* fpart = mFeatureParts.takeFirst();
+    const GEOSGeometry* geom = fpart->geos();
     double chopInterval = fpart->repeatDistance();
     if ( chopInterval != 0. && GEOSGeomTypeId_r( geosctxt, geom ) == GEOS_LINESTRING )
     {
@@ -483,8 +482,8 @@ void Layer::chopFeaturesAtRepeatDistance()
           GEOSCoordSeq_setY_r( geosctxt, cooSeq, i, part[i].y );
         }
 
-        GEOSGeometry *newgeom = GEOSGeom_createLineString_r( geosctxt, cooSeq );
-        FeaturePart *newfpart = new FeaturePart( fpart->feature(), newgeom );
+        GEOSGeometry* newgeom = GEOSGeom_createLineString_r( geosctxt, cooSeq );
+        LabelFeaturePart* newfpart = new LabelFeaturePart( fpart->feature(), newgeom );
         newFeatureParts.append( newfpart );
         newfpart->getBoundingBox( bmin, bmax );
         mFeatureIndex->Insert( bmin, bmax, newfpart );
@@ -500,8 +499,8 @@ void Layer::chopFeaturesAtRepeatDistance()
         GEOSCoordSeq_setY_r( geosctxt, cooSeq, i, part[i].y );
       }
 
-      GEOSGeometry *newgeom = GEOSGeom_createLineString_r( geosctxt, cooSeq );
-      FeaturePart *newfpart = new FeaturePart( fpart->feature(), newgeom );
+      GEOSGeometry* newgeom = GEOSGeom_createLineString_r( geosctxt, cooSeq );
+      LabelFeaturePart* newfpart = new LabelFeaturePart( fpart->feature(), newgeom );
       newFeatureParts.append( newfpart );
       newfpart->getBoundingBox( bmin, bmax );
       mFeatureIndex->Insert( bmin, bmax, newfpart );
