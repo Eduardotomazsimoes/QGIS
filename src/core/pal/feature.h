@@ -60,13 +60,12 @@ namespace pal
         double width;
       } CharacterInfo;
 
-      LabelInfo( int num, double height, double maxinangle = 20.0, double maxoutangle = -20.0 )
+      LabelInfo( int num, double height, double maxInAngle = 20.0, double maxOutAngle = -20.0 )
+        : max_char_angle_inside( maxInAngle )
+        , max_char_angle_outside( maxOutAngle > 0 ? -maxOutAngle : maxOutAngle ) // outside angle should be negative
+        , label_height( height )
+        , char_num( num )
       {
-        max_char_angle_inside = maxinangle;
-        // outside angle should be negative
-        max_char_angle_outside = maxoutangle > 0 ? -maxoutangle : maxoutangle;
-        label_height = height;
-        char_num = num;
         char_info = new CharacterInfo[num];
       }
       ~LabelInfo() { delete [] char_info; }
@@ -76,8 +75,8 @@ namespace pal
       //! LabelInfo cannot be copied
       LabelInfo &operator=( const LabelInfo &rh ) = delete;
 
-      double max_char_angle_inside;
-      double max_char_angle_outside;
+      double max_char_angle_inside = 20.0;
+      double max_char_angle_outside = -20.0;
       double label_height;
       int char_num;
       CharacterInfo *char_info = nullptr;
@@ -105,46 +104,55 @@ namespace pal
        */
       ~FeaturePart() override;
 
-      //! Returns the feature's obstacle factor, which represents the penalty
-      //! incurred for a label to overlap the feature
+      /**
+       * Returns the feature's obstacle factor, which represents the penalty
+       * incurred for a label to overlap the feature
+       */
       virtual double obstacleFactor() const = 0;
 
       //! Returns the obstacle type for this feature
       virtual QgsPalLayerSettings::ObstacleType obstacleType() const = 0;
 
-      virtual FeaturePart* clone() const = 0;
+      virtual FeaturePart *clone() const = 0;
 
     protected:
 
-      QList<FeaturePart*> mHoles;
+      QList<FeaturePart *> mHoles;
 
-      /** \brief read coordinates from a GEOS geom */
-      void extractCoords( const GEOSGeometry* geom );
+      //! \brief read coordinates from a GEOS geom
+      void extractCoords( const GEOSGeometry *geom );
 
-      void init( const GEOSGeometry* geom );
+      void init( const GEOSGeometry *geom );
 
     private:
-      virtual FeaturePart* createHole( const GEOSGeometry* geom ) = 0;
+      virtual FeaturePart *createHole( const GEOSGeometry *geom ) = 0;
 
   };
 
   class CORE_EXPORT ObstacleFeaturePart : public FeaturePart
   {
     public:
-      /** Creates a new generic feature.
-        * @param geom a pointer to a GEOS geometry
+
+      /**
+       * Creates a new obstacle feature part from a \a geometry.
         */
-      ObstacleFeaturePart( const GEOSGeometry* geom, double obstacleFactor, QgsPalLayerSettings::ObstacleType obstacleType );
+      ObstacleFeaturePart( const QgsGeometry &geometry, double obstacleFactor, QgsPalLayerSettings::ObstacleType obstacleType );
 
       double obstacleFactor() const override { return mObstacleFactor; }
       QgsPalLayerSettings::ObstacleType obstacleType() const override { return mObstacleType; }
-      FeaturePart* clone() const override;
+      FeaturePart *clone() const override;
 
     private:
+
+      /**
+       * Creates a new obstacle feature part from a geos \a geometry. Ownership of \a geometry is NOT transferred.
+       */
+      ObstacleFeaturePart( const GEOSGeometry *geometry, double obstacleFactor, QgsPalLayerSettings::ObstacleType obstacleType );
+
       double mObstacleFactor;
       QgsPalLayerSettings::ObstacleType mObstacleType;
 
-      FeaturePart* createHole( const GEOSGeometry* geom ) override;
+      FeaturePart *createHole( const GEOSGeometry *geom ) override;
   };
 
   /**
@@ -158,22 +166,24 @@ namespace pal
 
     public:
 
-      /** Creates a new generic feature.
+      /**
+       * Creates a new generic feature.
         * @param lf a pointer for a feature which contains the spatial entites
         * @param geom a pointer to a GEOS geometry
         */
-      LabelFeaturePart( QgsLabelFeature* lf, const GEOSGeometry* geom );
+      LabelFeaturePart( QgsLabelFeature *lf, const GEOSGeometry *geom );
 
-      FeaturePart* clone() const override;
+      FeaturePart *clone() const override;
 
-      /** Returns the parent feature.
+      /**
+       * Returns the parent feature.
        */
       QgsLabelFeature *feature() { return mLF; }
 
       /**
        * Returns the layer that feature belongs to.
        */
-      Layer* layer() const;
+      Layer *layer() const;
 
       /**
        * Returns the unique ID of the feature.
@@ -284,7 +294,7 @@ namespace pal
        * \param part part to compare to
        * \returns true if both parts belong to same QgsLabelFeature
        */
-      bool hasSameLabelFeatureAs( LabelFeaturePart* part ) const;
+      bool hasSameLabelFeatureAs( LabelFeaturePart *part ) const;
 
 #if 0
 
@@ -327,15 +337,15 @@ namespace pal
       int getNumSelfObstacles() const { return mHoles.count(); }
       //! Get hole (inner ring) - considered as obstacle
 
-      LabelFeaturePart* getSelfObstacle( int i ) { return static_cast< LabelFeaturePart*>( mHoles.at( i ) ); }
+      LabelFeaturePart *getSelfObstacle( int i ) { return static_cast< LabelFeaturePart *>( mHoles.at( i ) ); }
 
-      /** Check whether this part is connected with some other part */
-      bool isConnected( LabelFeaturePart* p2 );
+      //! Check whether this part is connected with some other part
+      bool isConnected( LabelFeaturePart *p2 );
 
       /**
        * Merge other (connected) part with this one and save the result in this part (other is unchanged).
        * Return true on success, false if the feature wasn't modified */
-      bool mergeWithFeaturePart( LabelFeaturePart* other );
+      bool mergeWithFeaturePart( LabelFeaturePart *other );
 
       void addSizePenalty( int nbp, QList<LabelPosition *> &lPos, double bbx[4], double bby[4] );
 
@@ -356,13 +366,13 @@ namespace pal
 
     protected:
 
-      QgsLabelFeature* mLF;
+      QgsLabelFeature *mLF = nullptr;
 
     private:
 
       LabelPosition::Quadrant quadrantFromOffset() const;
 
-      FeaturePart* createHole( const GEOSGeometry* geom ) override;
+      FeaturePart *createHole( const GEOSGeometry *geom ) override;
   };
 
 } // end namespace pal

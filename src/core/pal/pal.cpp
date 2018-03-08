@@ -224,7 +224,7 @@ bool filteringCallback( FeaturePart *featurePart, void *ctx )
 std::unique_ptr<Problem> Pal::extract( const QgsRectangle &extent, const QgsGeometry &mapBoundary )
 {
   // to store obstacles
-  RTree<FeaturePart *, double, 2, double> *obstacles = new RTree<FeaturePart *, double, 2, double>();
+  auto obstacles = qgis::make_unique< RTree<FeaturePart *, double, 2, double> >();
 
   std::unique_ptr< Problem > prob = qgis::make_unique< Problem >();
 
@@ -256,12 +256,12 @@ std::unique_ptr<Problem> Pal::extract( const QgsRectangle &extent, const QgsGeom
   geos::prepared_unique_ptr mapBoundaryPrepared( GEOSPrepare_r( geosContext(), mapBoundaryGeos.get() ) );
 
   context.fFeats = fFeats;
-  context.obstacles = obstacles;
+  context.obstacles = obstacles.get();
   context.candidates = prob->candidates;
   context.mapBoundary = mapBoundaryPrepared.get();
 
   ObstacleCallBackCtx obstacleContext;
-  obstacleContext.obstacles = obstacles;
+  obstacleContext.obstacles = obstacles.get();
   obstacleContext.obstacleCount = 0;
 
   // first step : extract features from layers
@@ -315,24 +315,20 @@ std::unique_ptr<Problem> Pal::extract( const QgsRectangle &extent, const QgsGeom
   if ( fFeats->isEmpty() )
   {
     delete fFeats;
-    delete obstacles;
     return nullptr;
   }
 
   // add manual obstacles
-  QList< QgsLabelBlockingRegion >::const_iterator regionIt = mLabelBlockingRegions.constBegin();
-  QList< ObstacleFeaturePart* > blockingRegionParts;
-  for ( ; regionIt != mLabelBlockingRegions.constEnd(); ++regionIt )
+  std::vector< std::unique_ptr< ObstacleFeaturePart > > blockingRegionParts;
+  for ( const QgsLabelBlockingRegion &region : qgis::as_const( mLabelBlockingRegions ) )
   {
-    QgsGeometry region = regionIt->geometry;
-    double factor = regionIt->factor;
-
-    ObstacleFeaturePart* regionPart = new ObstacleFeaturePart( region.asGeos(), factor, QgsPalLayerSettings::PolygonWhole );
-    blockingRegionParts << regionPart;
+    std::unique_ptr< ObstacleFeaturePart > regionPart = qgis::make_unique< ObstacleFeaturePart >( region.geometry, region.factor, QgsPalLayerSettings::PolygonWhole );
 
     double amin[2], amax[2];
     regionPart->getBoundingBox( amin, amax );
-    obstacles->Insert( amin, amax, regionPart );
+    obstacles->Insert( amin, amax, regionPart.get() );
+
+    blockingRegionParts.emplace_back( std::move( regionPart ) );
   }
 
   prob->nbft = fFeats->size();
@@ -361,8 +357,6 @@ std::unique_ptr<Problem> Pal::extract( const QgsRectangle &extent, const QgsGeom
 
     qDeleteAll( *fFeats );
     delete fFeats;
-    delete obstacles;
-    qDeleteAll( blockingRegionParts );
     return nullptr;
   }
 
@@ -388,7 +382,7 @@ std::unique_ptr<Problem> Pal::extract( const QgsRectangle &extent, const QgsGeom
     }
 
     // sort candidates by cost, skip less interesting ones, calculate polygon costs (if using polygons)
-    max_p = CostCalculator::finalizeCandidatesCosts( feat, max_p, obstacles, bbx, bby );
+    max_p = CostCalculator::finalizeCandidatesCosts( feat, max_p, obstacles.get(), bbx, bby );
 
     // only keep the 'max_p' best candidates
     while ( feat->lPos.count() > max_p )
@@ -426,8 +420,6 @@ std::unique_ptr<Problem> Pal::extract( const QgsRectangle &extent, const QgsGeom
 
       qDeleteAll( *fFeats );
       delete fFeats;
-      delete obstacles;
-      qDeleteAll( blockingRegionParts );
       return nullptr;
     }
 
@@ -453,10 +445,6 @@ std::unique_ptr<Problem> Pal::extract( const QgsRectangle &extent, const QgsGeom
     delete feat;
   }
   delete fFeats;
-
-  //delete candidates;
-  delete obstacles;
-  qDeleteAll( blockingRegionParts );
 
   nbOverlaps /= 2;
   prob->all_nblp = prob->nblp;
