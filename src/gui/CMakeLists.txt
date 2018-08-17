@@ -339,6 +339,7 @@ SET(QGIS_GUI_SRCS
   qgsprojectionselectiontreewidget.cpp
   qgspropertyassistantwidget.cpp
   qgspropertyoverridebutton.cpp
+  qgsprovidersourcewidget.cpp
   qgsproxystyle.cpp
   qgsquerybuilder.cpp
   qgsrasterformatsaveoptionswidget.cpp
@@ -510,6 +511,7 @@ SET(QGIS_GUI_MOC_HDRS
   qgsprojectionselectiontreewidget.h
   qgspropertyassistantwidget.h
   qgspropertyoverridebutton.h
+  qgsprovidersourcewidget.h
   qgsproxystyle.h
   qgsquerybuilder.h
   qgsrasterformatsaveoptionswidget.h

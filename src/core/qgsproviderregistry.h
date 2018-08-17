@@ -33,7 +33,7 @@
 class QgsProviderMetadata;
 class QgsVectorLayer;
 class QgsCoordinateReferenceSystem;
-
+class QgsProviderSourceWidget;
 
 /**
  * \ingroup core
@@ -116,6 +116,21 @@ class CORE_EXPORT QgsProviderRegistry
         \since QGIS 3.4
      */
     QVariantMap decodeUri( const QString &providerKey, const QString &uri );
+
+    /**
+     * Returns a new widget for displaying (and possibly changing) properties of the data provider's
+     * source. E.g. for disk based layers this may return a widget showing a file widget with the
+     * provider's current path, and for database providers it may return a widget showing the host,
+     * schema, layer, etc information.
+     *
+     * Either the \a parent widget must be set or the caller becomes responsible for deleting the returned widget.
+     *
+     * \note This function may not be supported by all providers, in which case a nullptr will be returned.
+     * \note Not available in Pythong bindings
+     * \since QGIS 3.4
+     */
+    QgsProviderSourceWidget *createSourceWidget( const QString &providerKey, QWidget *parent = nullptr ) SIP_SKIP;
+
 
     /**
      * Returns a new widget for selecting layers from a provider.

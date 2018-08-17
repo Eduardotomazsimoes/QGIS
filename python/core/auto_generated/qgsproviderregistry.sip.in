@@ -13,7 +13,6 @@
 
 
 
-
 class QgsProviderRegistry
 {
 %Docstring
@@ -109,6 +108,8 @@ Returns the components (e.g. file path, layer name) of a provider uri
 
 .. versionadded:: 3.4
 %End
+
+
 
     QWidget *createSelectionWidget( const QString &providerKey,
                                     QWidget *parent = 0,

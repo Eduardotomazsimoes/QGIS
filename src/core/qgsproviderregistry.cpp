@@ -456,6 +456,24 @@ QVariantMap QgsProviderRegistry::decodeUri( const QString &providerKey, const QS
   return decodeUri( uri );
 }
 
+typedef QgsProviderSourceWidget *sourceFactoryFunction_t( QWidget *parent );
+
+QgsProviderSourceWidget *QgsProviderRegistry::createSourceWidget( const QString &providerKey, QWidget *parent )
+{
+  std::unique_ptr< QLibrary > library( createProviderLibrary( providerKey ) );
+  if ( !library )
+  {
+    return nullptr;
+  }
+
+  sourceFactoryFunction_t *sourceFactory = reinterpret_cast< sourceFactoryFunction_t *>( cast_to_fptr( library->resolve( "decodeUri" ) ) );
+  if ( !sourceFactory )
+  {
+    return nullptr;
+  }
+  return sourceFactory( parent );
+}
+
 int QgsProviderRegistry::providerCapabilities( const QString &providerKey ) const
 {
   std::unique_ptr< QLibrary > library( createProviderLibrary( providerKey ) );
