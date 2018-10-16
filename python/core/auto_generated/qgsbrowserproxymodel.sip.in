@@ -28,6 +28,14 @@ A QSortFilterProxyModel subclass for filtering and sorting browser model items.
       RegularExpression,
     };
 
+    enum Flag
+    {
+      HideEmptyTopLevelItems,
+      HideNonLayerItems,
+    };
+    typedef QFlags<QgsBrowserProxyModel::Flag> Flags;
+
+
     explicit QgsBrowserProxyModel( QObject *parent /TransferThis/ = 0 );
 %Docstring
 Constructor for QgsBrowserProxyModel, with the specified ``parent`` object.
@@ -133,12 +141,29 @@ filterByLayerType() is true.
 .. seealso:: :py:func:`setFilterByLayerType`
 %End
 
+    Flags filterFlags() const;
+%Docstring
+Returns any preset filter flags.
+
+.. seealso:: :py:func:`setFlags`
+%End
+
+    void setFilterFlags( QgsBrowserProxyModel::Flags flags );
+%Docstring
+Sets the filter ``flags``, which control specific filtering behavior in the proxy model.
+
+.. seealso:: :py:func:`filterFlags`
+%End
+
   protected:
 
     virtual bool filterAcceptsRow( int sourceRow, const QModelIndex &sourceParent ) const;
 
 
 };
+
+QFlags<QgsBrowserProxyModel::Flag> operator|(QgsBrowserProxyModel::Flag f1, QFlags<QgsBrowserProxyModel::Flag> f2);
+
 
 /************************************************************************
  * This file has been generated automatically from                      *

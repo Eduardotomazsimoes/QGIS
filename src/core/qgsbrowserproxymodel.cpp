@@ -146,11 +146,25 @@ bool QgsBrowserProxyModel::filterAcceptsString( const QString &value ) const
 
 bool QgsBrowserProxyModel::filterAcceptsRow( int sourceRow, const QModelIndex &sourceParent ) const
 {
-  if ( ( mFilter.isEmpty() && !mFilterByLayerType ) || !mModel )
+  if ( ( mFilter.isEmpty() && !mFilterByLayerType && !mFlags ) || !mModel )
     return true;
 
   QModelIndex sourceIndex = mModel->index( sourceRow, 0, sourceParent );
   return filterAcceptsItem( sourceIndex ) || filterAcceptsAncestor( sourceIndex ) || filterAcceptsDescendant( sourceIndex );
+}
+
+QgsBrowserProxyModel::Flags QgsBrowserProxyModel::filterFlags() const
+{
+  return mFlags;
+}
+
+void QgsBrowserProxyModel::setFilterFlags( Flags flags )
+{
+  if ( flags == mFlags )
+    return;
+
+  mFlags = flags;
+  invalidateFilter();
 }
 
 QgsMapLayer::LayerType QgsBrowserProxyModel::layerType() const
@@ -208,15 +222,27 @@ bool QgsBrowserProxyModel::filterAcceptsItem( const QModelIndex &sourceIndex ) c
   if ( !mModel )
     return true;
 
+  QgsDataItem *item = mModel->dataItem( sourceIndex );
   if ( mFilterByLayerType )
   {
-    QgsDataItem *item = mModel->dataItem( sourceIndex );
     if ( QgsLayerItem *layerItem = qobject_cast< QgsLayerItem * >( item ) )
     {
       if ( layerItem->mapLayerType() != mLayerType )
         return false;
     }
     else if ( !qobject_cast< QgsDataCollectionItem * >( item ) )
+      return false;
+  }
+
+  if ( mFlags & HideEmptyTopLevelItems )
+  {
+    if ( !item || ( !item->parent() && !item->hasChildren() ) )
+      return false;
+  }
+
+  if ( mFlags & HideNonLayerItems )
+  {
+    if ( !qobject_cast< QgsLayerItem * >( item ) && !qobject_cast< QgsDataCollectionItem * >( item ) )
       return false;
   }
 

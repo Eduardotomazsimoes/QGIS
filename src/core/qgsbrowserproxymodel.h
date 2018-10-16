@@ -42,6 +42,15 @@ class CORE_EXPORT QgsBrowserProxyModel : public QSortFilterProxyModel
       RegularExpression, //!< Regular expression filtering
     };
 
+    //! Flags controlling filter behavior
+    enum Flag
+    {
+      HideEmptyTopLevelItems = 1 << 1, //!< Any empty top level (i.e. provider) items should be hidden
+      HideNonLayerItems = 1 << 2, //!< Hide any non-layer items, such as project file items
+    };
+    Q_DECLARE_FLAGS( Flags, Flag )
+    Q_FLAG( Flags )
+
     /**
       * Constructor for QgsBrowserProxyModel, with the specified \a parent object.
       */
@@ -143,6 +152,20 @@ class CORE_EXPORT QgsBrowserProxyModel : public QSortFilterProxyModel
      */
     void setLayerType( QgsMapLayer::LayerType type );
 
+    /**
+     * Returns any preset filter flags.
+     *
+     * \see setFlags()
+     */
+    Flags filterFlags() const;
+
+    /**
+     * Sets the filter \a flags, which control specific filtering behavior in the proxy model.
+     *
+     * \see filterFlags()
+     */
+    void setFilterFlags( QgsBrowserProxyModel::Flags flags );
+
   protected:
 
     // It would be better to apply the filer only to expanded (visible) items, but using mapFromSource() + view here was causing strange errors
@@ -159,6 +182,8 @@ class CORE_EXPORT QgsBrowserProxyModel : public QSortFilterProxyModel
     bool mFilterByLayerType = false;
     QgsMapLayer::LayerType mLayerType = QgsMapLayer::VectorLayer;
 
+    Flags mFlags = nullptr;
+
     //! Update filter
     void updateFilter();
 
@@ -174,5 +199,7 @@ class CORE_EXPORT QgsBrowserProxyModel : public QSortFilterProxyModel
     //! Filter accepts item name
     bool filterAcceptsItem( const QModelIndex &sourceIndex ) const;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS( QgsBrowserProxyModel::Flags )
 
 #endif // QGSBROWSERPROXYMODEL_H
