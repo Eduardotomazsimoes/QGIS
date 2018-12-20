@@ -676,7 +676,7 @@ int FeaturePart::createCandidatesAlongLineNearStraightSegments( QList<LabelPosit
   straightSegmentLengths << currentStraightSegmentLength;
   straightSegmentAngles << QgsGeometryUtils::normalizedAngle( std::atan2( y[numberNodes - 1] - segmentStartY, x[numberNodes - 1] - segmentStartX ) );
   longestSegmentLength = std::max( longestSegmentLength, currentStraightSegmentLength );
-  double middleOfLine = totalLineLength / 2.0;
+  const double lineAnchorPoint = totalLineLength * 0.0; // or 0.5 for mid point, or 1.0 for end, etc
 
   if ( totalLineLength < labelWidth )
   {
@@ -743,10 +743,10 @@ int FeaturePart::createCandidatesAlongLineNearStraightSegments( QList<LabelPosit
 
       if ( !closedLine )
       {
-        // penalize positions which are further from absolute center of whole linestring
+        // penalize positions which are further from anchor point of linestring
         // this only applies to non closed linestrings, since the middle of a closed linestring is effectively arbitrary
         // and irrelevant to labeling
-        double costLineCenter = 2 * std::fabs( labelCenter - middleOfLine ) / totalLineLength; // 0 -> 1
+        double costLineCenter = 2 * std::fabs( labelCenter - lineAnchorPoint ) / totalLineLength; // 0 -> 1
         cost += costLineCenter * 0.0005;  // < 0, 0.0005 >
       }
 
@@ -868,6 +868,8 @@ int FeaturePart::createCandidatesAlongLineNearMidpoint( QList<LabelPosition *> &
     currentDistanceAlongLine = std::numeric_limits< double >::max();
   }
 
+  const double lineAnchorPoint = totalLineLength * 0.0; // or 0.5 for mid point, or 1.0 for end, etc
+
   double candidateLength;
   double beta;
   double candidateStartX, candidateStartY, candidateEndX, candidateEndY;
@@ -898,8 +900,8 @@ int FeaturePart::createCandidatesAlongLineNearMidpoint( QList<LabelPosition *> &
       cost = ( 1 - cost ) / 100; // ranges from 0.0001 to 0.01 (however a cost 0.005 is already a lot!)
     }
 
-    // penalize positions which are further from the line's midpoint
-    double costCenter = std::fabs( totalLineLength / 2 - ( currentDistanceAlongLine + labelWidth / 2 ) ) / totalLineLength; // <0, 0.5>
+    // penalize positions which are further from the line's anchor point
+    double costCenter = std::fabs( lineAnchorPoint - ( currentDistanceAlongLine + labelWidth / 2 ) ) / totalLineLength; // <0, 0.5>
     cost += costCenter / 1000;  // < 0, 0.0005 >
     cost += initialCost;
 
@@ -1166,6 +1168,8 @@ int FeaturePart::createCurvedCandidatesAlongLine( QList< LabelPosition * > &lPos
     total_distance += path_distances[i];
   }
 
+  const double lineAnchorPoint = total_distance * 0.0; // or 0.5 for mid point, or 1.0 for end, etc
+
   if ( qgsDoubleNear( total_distance, 0.0 ) )
   {
     delete[] path_distances;
@@ -1237,9 +1241,9 @@ int FeaturePart::createCurvedCandidatesAlongLine( QList< LabelPosition * > &lPos
     double cost = angle_diff_avg / 100; // <0, 0.031 > but usually <0, 0.003 >
     if ( cost < 0.0001 ) cost = 0.0001;
 
-    // penalize positions which are further from the line's midpoint
+    // penalize positions which are further from the line's anchor point
     double labelCenter = i + getLabelWidth() / 2;
-    double costCenter = std::fabs( total_distance / 2 - labelCenter ) / total_distance; // <0, 0.5>
+    double costCenter = std::fabs( lineAnchorPoint - labelCenter ) / total_distance; // <0, 0.5>
     cost += costCenter / 1000;  // < 0, 0.0005 >
     slp->setCost( cost );
 
