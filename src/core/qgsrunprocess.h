@@ -23,10 +23,12 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QThread>
 
 #include "qgis_core.h"
 #include "qgis_sip.h"
 
+class QgsFeedback;
 class QgsMessageOutput;
 
 /**
@@ -73,5 +75,88 @@ class CORE_EXPORT QgsRunProcess: public QObject SIP_NODEFAULTCTORS
     void dialogGone();
 #endif // !(QT_CONFIG(process)
 };
+
+class CORE_EXPORT QgsBlockingProcess : public QObject
+{
+    Q_OBJECT
+
+  public:
+
+    QgsBlockingProcess( const QString &process, const QStringList &arguments );
+
+#ifndef SIP_RUN
+    void setStdOutHandler( const std::function< void( const QByteArray & ) > &handler ) { mStdoutHandler = handler; }
+#else
+    void setStdOutHandler( SIP_PYCALLABLE / AllowNone / );
+    % MethodCode
+    Py_BEGIN_ALLOW_THREADS
+
+    sipCpp->setStdOutHandler( [a0]( const QByteArray &arg )
+    {
+      SIP_BLOCK_THREADS
+      Py_XDECREF( sipCallMethod( NULL, a0, "D", &arg, sipType_QByteArray, NULL ) );
+      SIP_UNBLOCK_THREADS
+    } );
+
+    Py_END_ALLOW_THREADS
+    % End
+#endif
+
+#ifndef SIP_RUN
+    void setStdErrHandler( const std::function< void( const QByteArray & ) > &handler ) { mStderrHandler = handler; }
+#else
+    void setStdErrHandler( SIP_PYCALLABLE / AllowNone / );
+    % MethodCode
+    Py_BEGIN_ALLOW_THREADS
+
+    sipCpp->setStdErrHandler( [a0]( const QByteArray &arg )
+    {
+      SIP_BLOCK_THREADS
+      Py_XDECREF( sipCallMethod( NULL, a0, "D", &arg, sipType_QByteArray, NULL ) );
+      SIP_UNBLOCK_THREADS
+    } );
+
+    Py_END_ALLOW_THREADS
+    % End
+#endif
+
+    int run( QgsFeedback *feedback );
+
+  private:
+
+    const QString mProcess;
+    const QStringList mArguments;
+    std::function< void( const QByteArray & ) > mStdoutHandler;
+    std::function< void( const QByteArray & ) > mStderrHandler;
+
+};
+
+
+///@cond PRIVATE
+#ifndef SIP_RUN
+
+class ProcessThread : public QThread
+{
+    Q_OBJECT
+
+  public:
+    ProcessThread( const std::function<void()> &function, QObject *parent = nullptr )
+      : QThread( parent )
+      , mFunction( function )
+    {
+    }
+
+    void run() override
+    {
+      mFunction();
+    }
+
+  private:
+    std::function<void()> mFunction;
+};
+
+#endif
+///@endcond
+
 
 #endif

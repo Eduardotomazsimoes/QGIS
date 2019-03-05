@@ -37,7 +37,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     from osgeo import ogr
 
-from qgis.core import (Qgis,
+from qgis.core import (Qgis, QgsBlockingProcess,
                        QgsApplication,
                        QgsVectorFileWriter,
                        QgsProcessingFeedback,
@@ -95,32 +95,46 @@ class GdalUtils:
         feedback.pushInfo('GDAL command output:')
         success = False
         retry_count = 0
-        while not success:
-            loglines = []
-            loglines.append('GDAL execution console output')
-            try:
-                with subprocess.Popen(
-                    fused_command,
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stdin=subprocess.DEVNULL,
-                    stderr=subprocess.STDOUT,
-                    universal_newlines=True,
-                ) as proc:
-                    for line in proc.stdout:
-                        feedback.pushConsoleInfo(line)
-                        loglines.append(line)
-                    success = True
-            except IOError as e:
-                if retry_count < 5:
-                    retry_count += 1
-                else:
-                    raise IOError(
-                        str(e) + u'\nTried 5 times without success. Last iteration stopped after reading {} line(s).\nLast line(s):\n{}'.format(
-                            len(loglines), u'\n'.join(loglines[-10:])))
+        #while not success and not feedback.isCanceled():
+        loglines = []
+        loglines.append('GDAL execution console output')
 
-            QgsMessageLog.logMessage('\n'.join(loglines), 'Processing', Qgis.Info)
-            GdalUtils.consoleOutput = loglines
+        proc = QgsBlockingProcess(commands[0] , commands[1:])
+
+        def stdout(ba):
+            feedback.pushConsoleInfo(ba.data().decode('UTF-8'))
+
+        def stderr(ba):
+            feedback.reportError(ba.data().decode('UTF-8'))
+
+        proc.setStdOutHandler(stdout)
+        proc.setStdErrHandler(stderr)
+
+        feedback.pushInfo(str(proc.run(feedback)))
+
+      #  try:
+       #     with subprocess.Popen(
+       #         fused_command,
+       #         shell=True,
+       #         stdout=subprocess.PIPE,
+       #         stdin=subprocess.DEVNULL,
+       #         stderr=subprocess.STDOUT,
+       #         universal_newlines=True,
+       #     ) as proc:
+       #         for line in proc.stdout:
+       #             feedback.pushConsoleInfo(line)
+       #             loglines.append(line)
+       #         success = True
+       # except IOError as e:
+       #     if retry_count < 5:
+       #         retry_count += 1
+       #     else:
+       #         raise IOError(
+       #             str(e) + u'\nTried 5 times without success. Last iteration stopped after reading {} line(s).\nLast line(s):\n{}'.format(
+       #                 len(loglines), u'\n'.join(loglines[-10:])))
+#
+        QgsMessageLog.logMessage('\n'.join(loglines), 'Processing', Qgis.Info)
+        GdalUtils.consoleOutput = loglines
 
     @staticmethod
     def getConsoleOutput():

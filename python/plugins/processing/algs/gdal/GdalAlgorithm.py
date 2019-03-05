@@ -66,8 +66,8 @@ class GdalAlgorithm(QgsProcessingAlgorithm):
     def createCustomParametersWidget(self, parent):
         return GdalAlgorithmDialog(self, parent=parent)
 
-    def flags(self):
-        return QgsProcessingAlgorithm.FlagSupportsBatch # cannot cancel!
+   # def flags(self):
+   #     return QgsProcessingAlgorithm.FlagSupportsBatch # cannot cancel!
 
     def getConsoleCommands(self, parameters, context, feedback, executing=True):
         return None
