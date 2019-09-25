@@ -89,6 +89,10 @@ class CORE_EXPORT QgsContrastEnhancementFunction
 
     //! \brief Data type of the band
     Qgis::DataType mQgsRasterDataType;
+
+    double mMaximumValuePossible = std::numeric_limits< double >::max();
+    double mMinimumValuePossible = std::numeric_limits< double >::lowest();
+
 };
 
 #endif
