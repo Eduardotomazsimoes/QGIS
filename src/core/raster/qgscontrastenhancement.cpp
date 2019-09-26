@@ -117,7 +117,7 @@ bool QgsContrastEnhancement::generateLookupTable()
   for ( int myIterator = 0; myIterator <= mRasterDataTypeRange; myIterator++ )
   {
     mLookupTable[myIterator] = mContrastEnhancementFunction->enhance( static_cast< double >( myIterator ) - mLookupTableOffset );
-    mDisplayableLookupTable[myIterator] = isValueInDisplayableRange( static_cast< double >( myIterator ) - mLookupTableOffset );
+    mDisplayableLookupTable[myIterator] = mContrastEnhancementFunction && mContrastEnhancementFunction->isValueInDisplayableRange( static_cast< double >( myIterator ) - mLookupTableOffset );
   }
 
   return true;

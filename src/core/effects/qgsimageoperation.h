@@ -20,6 +20,7 @@
 
 #include <QImage>
 #include "qgis_sip.h"
+#include "qgis.h"
 #include <QColor>
 
 #include "qgis_core.h"
@@ -262,7 +263,7 @@ class CORE_EXPORT QgsImageOperation
       void operator()( ImageBlock &block )
       {
         //do something with whole lines
-        int bpl = block.image->bytesPerLine();
+        qgssize bpl = block.image->bytesPerLine();
         if ( mOperation.direction() == ByRow )
         {
           for ( unsigned int y = block.beginLine; y < block.endLine; ++y )
@@ -419,11 +420,11 @@ class CORE_EXPORT QgsImageOperation
 
         LineOperationDirection direction() { return mDirection; }
 
-        void operator()( QRgb *startRef, int lineLength, int bytesPerLine )
+        void operator()( QRgb *startRef, int lineLength, qgssize bytesPerLine )
         {
           unsigned char *p = reinterpret_cast< unsigned char * >( startRef );
           int rgba[4];
-          int increment = ( mDirection == QgsImageOperation::ByRow ) ? 4 : bytesPerLine;
+          qgssize increment = ( mDirection == QgsImageOperation::ByRow ) ? 4 : bytesPerLine;
           if ( !mForwardDirection )
           {
             p += ( lineLength - 1 ) * increment;
@@ -474,10 +475,10 @@ class CORE_EXPORT QgsImageOperation
         int mRadius;
         LineOperationDirection mDirection;
         QImage *mDestImage = nullptr;
-        int mDestImageBpl;
+        qgssize mDestImageBpl;
         double *mKernel = nullptr;
 
-        inline QRgb gaussianBlurVertical( int posy, unsigned char *sourceFirstLine, int sourceBpl, int height );
+        inline QRgb gaussianBlurVertical( int posy, unsigned char *sourceFirstLine, const qgssize sourceBpl, int height );
         inline QRgb gaussianBlurHorizontal( int posx, unsigned char *sourceFirstLine, int width );
     };
 
@@ -495,7 +496,7 @@ class CORE_EXPORT QgsImageOperation
 
         LineOperationDirection direction() { return mDirection; }
 
-        void operator()( QRgb *startRef, int lineLength, int bytesPerLine );
+        void operator()( QRgb *startRef, int lineLength, qgssize bytesPerLine );
 
       private:
         LineOperationDirection mDirection;

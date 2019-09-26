@@ -121,7 +121,7 @@ void QgsImageOperation::runLineOperationOnWholeImage( QImage &image, LineOperati
   int width = image.width();
 
   //do something with whole lines
-  int bpl = image.bytesPerLine();
+  qgssize bpl = image.bytesPerLine();
   if ( operation.direction() == ByRow )
   {
     for ( int y = 0; y < height; ++y )
@@ -649,7 +649,7 @@ void QgsImageOperation::GaussianBlurOperation::operator()( QgsImageOperation::Im
 {
   int width = block.image->width();
   int height = block.image->height();
-  int sourceBpl = block.image->bytesPerLine();
+  qgssize sourceBpl = block.image->bytesPerLine();
 
   unsigned char *outputLineRef = mDestImage->scanLine( block.beginLine );
   QRgb *destRef = nullptr;
@@ -683,7 +683,7 @@ void QgsImageOperation::GaussianBlurOperation::operator()( QgsImageOperation::Im
   }
 }
 
-inline QRgb QgsImageOperation::GaussianBlurOperation::gaussianBlurVertical( const int posy, unsigned char *sourceFirstLine, const int sourceBpl, const int height )
+inline QRgb QgsImageOperation::GaussianBlurOperation::gaussianBlurVertical( const int posy, unsigned char *sourceFirstLine, const qgssize sourceBpl, const int height )
 {
   double r = 0;
   double b = 0;
@@ -878,9 +878,9 @@ QImage QgsImageOperation::cropTransparent( const QImage &image, QSize minSize, b
   return image.copy( QgsImageOperation::nonTransparentImageRect( image, minSize, center ) );
 }
 
-void QgsImageOperation::FlipLineOperation::operator()( QRgb *startRef, const int lineLength, const int bytesPerLine )
+void QgsImageOperation::FlipLineOperation::operator()( QRgb *startRef, const int lineLength, const qgssize bytesPerLine )
 {
-  int increment = ( mDirection == QgsImageOperation::ByRow ) ? 4 : bytesPerLine;
+  qgssize increment = ( mDirection == QgsImageOperation::ByRow ) ? 4 : bytesPerLine;
 
   //store temporary line
   unsigned char *p = reinterpret_cast< unsigned char * >( startRef );
