@@ -8684,6 +8684,7 @@ QString QgisApp::saveAsFile( QgsMapLayer *layer, const bool onlySelected, const 
     case QgsMapLayerType::MeshLayer:
     case QgsMapLayerType::VectorTileLayer:
     case QgsMapLayerType::PluginLayer:
+    case QgsMapLayerType::AnnotationLayer:
       return QString();
   }
   return QString();
@@ -14629,6 +14630,7 @@ void QgisApp::activateDeactivateLayerRelatedActions( QgsMapLayer *layer )
       break;
 
     case QgsMapLayerType::PluginLayer:
+    case QgsMapLayerType::AnnotationLayer:
       break;
 
   }
@@ -15635,6 +15637,12 @@ void QgisApp::showLayerProperties( QgsMapLayer *mapLayer, const QString &page )
       }
       break;
     }
+
+    case QgsMapLayerType::AnnotationLayer:
+    {
+      break;
+    }
+
   }
 }
 
