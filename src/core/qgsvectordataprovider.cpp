@@ -33,6 +33,7 @@
 #include "qgslogger.h"
 #include "qgsmessagelog.h"
 #include "qgssettings.h"
+#include "qgsogrproxytextcodec.h"
 #include <mutex>
 
 QgsVectorDataProvider::QgsVectorDataProvider( const QString &uri, const ProviderOptions &options )
@@ -40,6 +41,8 @@ QgsVectorDataProvider::QgsVectorDataProvider( const QString &uri, const Provider
   , mTemporalCapabilities( qgis::make_unique< QgsVectorDataProviderTemporalCapabilities >() )
 {
 }
+
+QgsVectorDataProvider::~QgsVectorDataProvider() = default;
 
 QString QgsVectorDataProvider::storageType() const
 {
@@ -193,16 +196,27 @@ QgsVectorDataProvider::Capabilities QgsVectorDataProvider::capabilities() const
   return QgsVectorDataProvider::NoCapabilities;
 }
 
-
 void QgsVectorDataProvider::setEncoding( const QString &e )
 {
-  mEncoding = QTextCodec::codecForName( e.toLocal8Bit().constData() );
+  mProxyCodec.reset();
 
+  mEncoding = QTextCodec::codecForName( e.toLocal8Bit().constData() );
   if ( !mEncoding && e != QLatin1String( "System" ) )
   {
     if ( !e.isEmpty() )
-      QgsMessageLog::logMessage( tr( "Codec %1 not found. Falling back to system locale" ).arg( e ) );
-    mEncoding = QTextCodec::codecForName( "System" );
+    {
+      // can we use the OGR proxy codec?
+      if ( QgsOgrProxyTextCodec::supportedCodecs().contains( e, Qt::CaseInsensitive ) )
+      {
+        mProxyCodec = qgis::make_unique< QgsOgrProxyTextCodec >( e.toLocal8Bit() );
+        mEncoding = mProxyCodec.get();
+      }
+      else
+      {
+        QgsMessageLog::logMessage( tr( "Codec %1 not found. Falling back to system locale" ).arg( e ) );
+        mEncoding = QTextCodec::codecForName( "System" );
+      }
+    }
   }
 
   if ( !mEncoding )

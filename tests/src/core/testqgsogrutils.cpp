@@ -27,6 +27,7 @@
 #include "qgsogrutils.h"
 #include "qgsapplication.h"
 #include "qgspoint.h"
+#include "qgsogrproxytextcodec.h"
 
 class TestQgsOgrUtils: public QObject
 {
@@ -47,6 +48,7 @@ class TestQgsOgrUtils: public QObject
     void readOgrFields();
     void stringToFeatureList();
     void stringToFields();
+    void textCodec();
 
   private:
 
@@ -489,7 +491,15 @@ void TestQgsOgrUtils::stringToFields()
   QCOMPARE( fields.at( 1 ).type(), QVariant::Double );
 }
 
+void TestQgsOgrUtils::textCodec()
+{
+  QVERIFY( QgsOgrProxyTextCodec::supportedCodecs().contains( QStringLiteral( "CP852" ) ) );
+  QVERIFY( !QgsOgrProxyTextCodec::supportedCodecs().contains( QStringLiteral( "xxx" ) ) );
 
+  QgsOgrProxyTextCodec codec( "CP852" );
+  QCOMPARE( codec.toUnicode( codec.fromUnicode( "abcŐ" ) ), QStringLiteral( "abcŐ" ) );
+  QCOMPARE( codec.toUnicode( codec.fromUnicode( "" ) ), QString() );
+}
 
 QGSTEST_MAIN( TestQgsOgrUtils )
 #include "testqgsogrutils.moc"

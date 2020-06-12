@@ -44,7 +44,7 @@ class QgsTransaction;
 class QgsFeedback;
 class QgsFeatureRenderer;
 class QgsAbstractVectorLayerLabeling;
-
+class QgsOgrProxyTextCodec;
 
 /**
  * \ingroup core
@@ -124,6 +124,7 @@ class CORE_EXPORT QgsVectorDataProvider : public QgsDataProvider, public QgsFeat
      * Additional creation options are specified within the \a options value.
      */
     QgsVectorDataProvider( const QString &uri = QString(), const QgsDataProvider::ProviderOptions &providerOptions = QgsDataProvider::ProviderOptions() );
+    ~QgsVectorDataProvider() override;
 
     /**
      * Returns feature source object that can be used for querying provider's data. The returned feature source
@@ -682,6 +683,7 @@ class CORE_EXPORT QgsVectorDataProvider : public QgsDataProvider, public QgsFeat
 
     //! Encoding
     QTextCodec *mEncoding = nullptr;
+    std::unique_ptr< QgsOgrProxyTextCodec > mProxyCodec;
 
     //! List of attribute indices to fetch with nextFeature calls
     QgsAttributeList mAttributesToFetch;

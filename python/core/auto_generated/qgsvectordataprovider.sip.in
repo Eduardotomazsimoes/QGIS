@@ -12,7 +12,6 @@
 typedef QHash<int, QString> QgsAttrPalIndexNameHash;
 
 
-
 class QgsVectorDataProvider : QgsDataProvider, QgsFeatureSink, QgsFeatureSource
 {
 %Docstring
@@ -76,6 +75,7 @@ The ``uri`` argument specifies the uniform resource locator (URI) for the associ
 
 Additional creation options are specified within the ``options`` value.
 %End
+    ~QgsVectorDataProvider();
 
     virtual QgsAbstractFeatureSource *featureSource() const = 0 /Factory/;
 %Docstring
