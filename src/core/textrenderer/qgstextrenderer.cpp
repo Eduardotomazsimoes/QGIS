@@ -297,7 +297,11 @@ double QgsTextRenderer::drawBuffer( QgsRenderContext &context, const QgsTextRend
         const QStringList parts = QgsPalLabeling::splitToGraphemes( fragment.text() );
         for ( const QString &part : parts )
         {
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
           double partXOffset = ( labelWidth - ( fragmentMetrics.width( part ) - letterSpacing ) ) / 2;
+#else
+          double partXOffset = ( labelWidth - ( fragmentMetrics.horizontalAdvance( part ) - letterSpacing ) ) / 2;
+#endif
           path.addText( partXOffset, partYOffset, fragmentFont, part );
           partYOffset += fragmentMetrics.ascent() + letterSpacing;
         }
@@ -1192,7 +1196,11 @@ void QgsTextRenderer::drawTextInternal( TextPart drawType,
         case Point:
           for ( const QString &line : textLines )
           {
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
             double labelWidth = fontMetrics->width( line );
+#else
+            double labelWidth = fontMetrics->horizontalAdvance( line );
+#endif
             if ( labelWidth > labelWidest )
             {
               labelWidest = labelWidth;
@@ -1239,7 +1247,11 @@ void QgsTextRenderer::drawTextInternal( TextPart drawType,
 
         // figure x offset for horizontal alignment of multiple lines
         double xMultiLineOffset = 0.0;
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
         double labelWidth = fontMetrics->width( line );
+#else
+        double labelWidth = fontMetrics->horizontalAdvance( line );
+#endif
         if ( adjustForAlignment )
         {
           double labelWidthDiff = labelWidest - labelWidth;
@@ -1552,7 +1564,11 @@ void QgsTextRenderer::drawTextInternal( TextPart drawType,
             double partYOffset = 0.0;
             for ( const auto &part : parts )
             {
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
               double partXOffset = ( labelWidth - ( fragmentMetrics.width( part ) - letterSpacing ) ) / 2;
+#else
+              double partXOffset = ( labelWidth - ( fragmentMetrics.horizontalAdvance( part ) - letterSpacing ) ) / 2;
+#endif
               path.addText( partXOffset, partYOffset, fragmentFont, part );
               partYOffset += fragmentMetrics.ascent() + letterSpacing;
             }
@@ -1615,7 +1631,11 @@ void QgsTextRenderer::drawTextInternal( TextPart drawType,
                 double partYOffset = 0.0;
                 for ( const QString &part : parts )
                 {
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
                   double partXOffset = ( labelWidth - ( fragmentMetrics.width( part ) - letterSpacing ) ) / 2;
+#else
+                  double partXOffset = ( labelWidth - ( fragmentMetrics.horizontalAdvance( part ) - letterSpacing ) ) / 2;
+#endif
                   context.painter()->drawText( partXOffset, fragmentYOffset + partYOffset, part );
                   partYOffset += fragmentMetrics.ascent() + letterSpacing;
                 }
