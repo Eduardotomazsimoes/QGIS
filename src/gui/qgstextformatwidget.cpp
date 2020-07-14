@@ -1766,6 +1766,7 @@ void QgsTextFormatWidget::setFormatFromStyle( const QString &name, QgsStyle::Sty
     case QgsStyle::TagEntity:
     case QgsStyle::SmartgroupEntity:
     case QgsStyle::LegendPatchShapeEntity:
+    case QgsStyle::Symbol3DEntity:
       return;
 
     case QgsStyle::TextFormatEntity:
