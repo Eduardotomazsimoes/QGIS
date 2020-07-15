@@ -17,15 +17,190 @@
    <property name="leftMargin">
     <number>0</number>
    </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+   <item row="2" column="0" colspan="2">
+    <widget class="QgsCollapsibleGroupBox" name="transformationWidget">
+     <property name="title">
+      <string>Transformation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="1">
+       <widget class="QgsDoubleSpinBox" name="spinSX">
+        <property name="minimum">
+         <double>-99999.899999999994179</double>
+        </property>
+        <property name="maximum">
+         <double>99999.899999999994179</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QgsDoubleSpinBox" name="spinTZ">
+        <property name="minimum">
+         <double>-99999.899999999994179</double>
+        </property>
+        <property name="maximum">
+         <double>99999.899999999994179</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QgsDoubleSpinBox" name="spinTX">
+        <property name="minimum">
+         <double>-99999.899999999994179</double>
+        </property>
+        <property name="maximum">
+         <double>99999.899999999994179</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>X</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QgsDoubleSpinBox" name="spinTY">
+        <property name="minimum">
+         <double>-99999.899999999994179</double>
+        </property>
+        <property name="maximum">
+         <double>99999.899999999994179</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QgsDoubleSpinBox" name="spinRX">
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QgsDoubleSpinBox" name="spinSY">
+        <property name="minimum">
+         <double>-99999.899999999994179</double>
+        </property>
+        <property name="maximum">
+         <double>99999.899999999994179</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QgsDoubleSpinBox" name="spinRZ">
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Rotation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QgsDoubleSpinBox" name="spinRY">
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Y</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QgsDoubleSpinBox" name="spinSZ">
+        <property name="minimum">
+         <double>-99999.899999999994179</double>
+        </property>
+        <property name="maximum">
+         <double>99999.899999999994179</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Translation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Scale</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Z</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QgsCollapsibleGroupBox" name="materialsGroupBox">
+     <property name="title">
+      <string>Shading</string>
+     </property>
+     <layout class="QGridLayout" name="shadingGroup">
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QgsMaterialWidget" name="widgetMaterial" native="true">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>10</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="0" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout_2">
      <property name="verticalSpacing">
@@ -226,196 +401,21 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QgsCollapsibleGroupBox" name="materialsGroupBox">
-     <property name="title">
-      <string>Shading</string>
-     </property>
-     <layout class="QGridLayout" name="shadingGroup">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QgsPhongMaterialWidget" name="widgetMaterial" native="true">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QgsCollapsibleGroupBox" name="transformationWidget">
-     <property name="title">
-      <string>Transformation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="1">
-       <widget class="QgsDoubleSpinBox" name="spinSX">
-        <property name="minimum">
-         <double>-99999.899999999994179</double>
-        </property>
-        <property name="maximum">
-         <double>99999.899999999994179</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QgsDoubleSpinBox" name="spinTZ">
-        <property name="minimum">
-         <double>-99999.899999999994179</double>
-        </property>
-        <property name="maximum">
-         <double>99999.899999999994179</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QgsDoubleSpinBox" name="spinTX">
-        <property name="minimum">
-         <double>-99999.899999999994179</double>
-        </property>
-        <property name="maximum">
-         <double>99999.899999999994179</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>X</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QgsDoubleSpinBox" name="spinTY">
-        <property name="minimum">
-         <double>-99999.899999999994179</double>
-        </property>
-        <property name="maximum">
-         <double>99999.899999999994179</double>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QgsDoubleSpinBox" name="spinRX">
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <double>360.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QgsDoubleSpinBox" name="spinSY">
-        <property name="minimum">
-         <double>-99999.899999999994179</double>
-        </property>
-        <property name="maximum">
-         <double>99999.899999999994179</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QgsDoubleSpinBox" name="spinRZ">
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <double>360.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Rotation</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QgsDoubleSpinBox" name="spinRY">
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <double>360.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Y</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QgsDoubleSpinBox" name="spinSZ">
-        <property name="minimum">
-         <double>-99999.899999999994179</double>
-        </property>
-        <property name="maximum">
-         <double>99999.899999999994179</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Translation</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Scale</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Z</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>Qgs3DModelSourceLineEdit</class>
+   <extends>QWidget</extends>
+   <header>qgs3dmodelsourcelineedit.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QgsMaterialWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsmaterialwidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>QgsDoubleSpinBox</class>
    <extends>QDoubleSpinBox</extends>
@@ -427,21 +427,9 @@
    <header>qgssymbolbutton.h</header>
   </customwidget>
   <customwidget>
-   <class>QgsPhongMaterialWidget</class>
-   <extends>QWidget</extends>
-   <header>qgsphongmaterialwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QgsCollapsibleGroupBox</class>
    <extends>QGroupBox</extends>
    <header>qgscollapsiblegroupbox.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Qgs3DModelSourceLineEdit</class>
-   <extends>QWidget</extends>
-   <header>qgs3dmodelsourcelineedit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
