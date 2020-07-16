@@ -22,6 +22,7 @@
 #include "qgspolygon3dsymbolwidget.h"
 #include "qgsline3dsymbolwidget.h"
 #include "qgsphongmaterialwidget.h"
+#include "qgsgoochmaterialwidget.h"
 
 void Qgs3DAppUtils::initialize()
 {
@@ -30,4 +31,5 @@ void Qgs3DAppUtils::initialize()
   dynamic_cast< Qgs3DSymbolMetadata * >( QgsApplication::symbol3DRegistry()->symbolMetadata( QStringLiteral( "polygon" ) ) )->setWidgetFunction( QgsPolygon3DSymbolWidget::create );
 
   dynamic_cast< QgsMaterialSettingsMetadata * >( Qgs3D::materialRegistry()->materialSettingsMetadata( QStringLiteral( "phong" ) ) )->setWidgetFunction( QgsPhongMaterialWidget::create );
+  dynamic_cast< QgsMaterialSettingsMetadata * >( Qgs3D::materialRegistry()->materialSettingsMetadata( QStringLiteral( "gooch" ) ) )->setWidgetFunction( QgsGoochMaterialWidget::create );
 }
