@@ -34,6 +34,8 @@
 #include "qgspoint3dsymbol_p.h"
 #include "qgsline3dsymbol_p.h"
 
+#include "qgsstyle.h"
+
 Qgs3D *Qgs3D::instance()
 {
   static Qgs3D *sInstance( new Qgs3D() );
@@ -61,6 +63,10 @@ void Qgs3D::initialize()
       &QgsLine3DSymbol::create, nullptr, Qgs3DSymbolImpl::handlerForLine3DSymbol ) );
   QgsApplication::symbol3DRegistry()->addSymbolType( new Qgs3DSymbolMetadata( QStringLiteral( "polygon" ), QObject::tr( "Polygon" ),
       &QgsPolygon3DSymbol::create, nullptr, Qgs3DSymbolImpl::handlerForPolygon3DSymbol ) );
+
+  // because we are usually populating the 3d registry AFTER QgsApplication initialisation, we need to defer creation
+  // of 3d symbols in the default style until now
+  QgsStyle::defaultStyle()->handleDeferred3DSymbolCreation();
 }
 
 Qgs3D::Qgs3D()
