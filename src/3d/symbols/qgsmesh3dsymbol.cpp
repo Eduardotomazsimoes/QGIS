@@ -133,6 +133,11 @@ void QgsMesh3DSymbol::readXml( const QDomElement &elem, const QgsReadWriteContex
     mDataDefinedProperties.readXml( elemDDP, propertyDefinitions() );
 }
 
+QgsAbstract3DSymbol::PreviewThumbnailSettings QgsMesh3DSymbol::thumbnailSettings() const
+{
+  return PreviewThumbnailSettings();
+}
+
 bool QgsMesh3DSymbol::smoothedTriangles() const
 {
   return mSmoothedTriangles;

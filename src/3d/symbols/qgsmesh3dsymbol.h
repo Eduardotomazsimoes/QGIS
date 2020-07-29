@@ -81,6 +81,7 @@ class _3D_EXPORT QgsMesh3DSymbol : public QgsAbstract3DSymbol
 
     void writeXml( QDomElement &elem, const QgsReadWriteContext &context ) const override;
     void readXml( const QDomElement &elem, const QgsReadWriteContext &context ) override;
+    PreviewThumbnailSettings thumbnailSettings() const override;
 
     /**
      * Returns if the 3d rendering is enabled

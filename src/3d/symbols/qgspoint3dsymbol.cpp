@@ -114,6 +114,19 @@ QList<QgsWkbTypes::GeometryType> QgsPoint3DSymbol::compatibleGeometryTypes() con
   return QList< QgsWkbTypes::GeometryType >() << QgsWkbTypes::PointGeometry;
 }
 
+QgsAbstract3DSymbol::PreviewThumbnailSettings QgsPoint3DSymbol::thumbnailSettings() const
+{
+  PreviewThumbnailSettings settings;
+  settings.geometry = QgsGeometry( new QgsPoint( 0, 0, 1 ) );
+
+  settings.fullExtent = QgsRectangle( -5, -5, 5, 5 );
+  settings.cameraTarget.set( 0, 0, 0 );
+  settings.cameraDistance = 10;
+  settings.lightSourceTransform = QVector3D( 5, 15, 5 );
+
+  return settings;
+}
+
 QgsPoint3DSymbol::Shape QgsPoint3DSymbol::shapeFromString( const QString &shape )
 {
   if ( shape ==  QStringLiteral( "sphere" ) )

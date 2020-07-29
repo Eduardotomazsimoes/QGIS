@@ -19,6 +19,9 @@
 #include "qgssymbollayerutils.h"
 #include "qgs3d.h"
 #include "qgsmaterialregistry.h"
+#include "qgsmultipolygon.h"
+#include "qgslinestring.h"
+#include "qgspolygon.h"
 
 QgsPolygon3DSymbol::QgsPolygon3DSymbol()
   : mMaterial( qgis::make_unique< QgsPhongMaterialSettings >() )
@@ -117,6 +120,48 @@ void QgsPolygon3DSymbol::readXml( const QDomElement &elem, const QgsReadWriteCon
 QList<QgsWkbTypes::GeometryType> QgsPolygon3DSymbol::compatibleGeometryTypes() const
 {
   return QList< QgsWkbTypes::GeometryType >() << QgsWkbTypes::PolygonGeometry;
+}
+
+QgsAbstract3DSymbol::PreviewThumbnailSettings QgsPolygon3DSymbol::thumbnailSettings() const
+{
+  PreviewThumbnailSettings settings;
+  settings.fullExtent = QgsRectangle( -5, -5, 5, 5 );
+
+  std::unique_ptr< QgsMultiPolygon > mp = qgis::make_unique< QgsMultiPolygon >();
+  mp->addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( -1, -1, 0 )
+                                   << QgsPoint( -1, 1, 0 )
+                                   << QgsPoint( 1, 1, 0 )
+                                   << QgsPoint( 1, -1, 0 )
+                                   << QgsPoint( -1, -1, 0 ) ) ) );
+  mp->addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( -1, -1, 0 )
+                                   << QgsPoint( -1, 1, 0 )
+                                   << QgsPoint( -1, 1, 1 )
+                                   << QgsPoint( -1, -1, 1 )
+                                   << QgsPoint( -1, -1, 0 ) ) ) );
+  mp->addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( -1, -1, 0 )
+                                   << QgsPoint( 1, -1, 0 )
+                                   << QgsPoint( 1, -1, 1 )
+                                   << QgsPoint( -1, -1, 1 )
+                                   << QgsPoint( -1, -1, 0 ) ) ) );
+  mp->addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( -1, 1, 0 )
+                                   << QgsPoint( 1, 1, 0 )
+                                   << QgsPoint( 1, 1, 1 )
+                                   << QgsPoint( -1, 1, 1 )
+                                   << QgsPoint( -1, 1, 0 ) ) ) );
+  mp->addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( 1, -1, 0 )
+                                   << QgsPoint( 1, 1, 0 )
+                                   << QgsPoint( 1, 1, 1 )
+                                   << QgsPoint( 1, -1, 1 )
+                                   << QgsPoint( 1, -1, 0 ) ) ) );
+  mp->addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( -1, -1, 1 )
+                                   << QgsPoint( -1, 1, 1 )
+                                   << QgsPoint( 1, 1, 1 )
+                                   << QgsPoint( 1, -1, 1 )
+                                   << QgsPoint( -1, -1, 1 ) ) ) );
+  settings.geometry = QgsGeometry( std::move( mp ) );
+  settings.cameraDistance = 10;
+  settings.lightSourceTransform = QVector3D( 5, 15, 5 );
+  return settings;
 }
 
 QgsAbstract3DSymbol *QgsPolygon3DSymbol::create()

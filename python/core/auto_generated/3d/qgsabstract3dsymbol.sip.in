@@ -85,6 +85,45 @@ Returns a reference to the symbol layer's property collection, used for data def
 Sets the symbol layer's property collection, used for data defined overrides.
 %End
 
+
+    class PreviewThumbnailSettings
+{
+%Docstring
+Exposes settings relating to how a preview thumbnail for a 3D symbol should be generated.
+
+.. versionadded:: 3.16
+%End
+
+%TypeHeaderCode
+#include "qgsabstract3dsymbol.h"
+%End
+      public:
+
+        QgsGeometry geometry;
+
+        QColor backgroundColor;
+
+        QColor planeColor;
+
+        QgsRectangle fullExtent;
+
+        QgsVector3D cameraTarget;
+
+        float cameraDistance;
+
+        float cameraPitch;
+
+        float cameraYaw;
+
+        QVector3D lightSourceTransform;
+
+    };
+
+    virtual PreviewThumbnailSettings thumbnailSettings() const = 0;
+%Docstring
+Returns the thumbnail preview settings for the symbol.
+%End
+
   protected:
 
     void copyBaseSettings( QgsAbstract3DSymbol *destination ) const;

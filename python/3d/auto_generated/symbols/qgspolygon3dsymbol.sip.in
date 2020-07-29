@@ -44,6 +44,8 @@ Constructor for QgsPolygon3DSymbol
 
     virtual QList< QgsWkbTypes::GeometryType > compatibleGeometryTypes() const;
 
+    virtual PreviewThumbnailSettings thumbnailSettings() const;
+
 
     static QgsAbstract3DSymbol *create() /Factory/;
 %Docstring

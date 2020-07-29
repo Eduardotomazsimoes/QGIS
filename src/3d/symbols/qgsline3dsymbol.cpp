@@ -17,6 +17,7 @@
 #include "qgs3dutils.h"
 #include "qgs3d.h"
 #include "qgsmaterialregistry.h"
+#include "qgslinestring.h"
 
 QgsLine3DSymbol::QgsLine3DSymbol()
   : mMaterial( qgis::make_unique< QgsPhongMaterialSettings >() )
@@ -97,6 +98,30 @@ void QgsLine3DSymbol::setMaterial( QgsAbstractMaterialSettings *material )
 QList<QgsWkbTypes::GeometryType> QgsLine3DSymbol::compatibleGeometryTypes() const
 {
   return QList< QgsWkbTypes::GeometryType >() << QgsWkbTypes::LineGeometry;
+}
+
+QgsAbstract3DSymbol::PreviewThumbnailSettings QgsLine3DSymbol::thumbnailSettings() const
+{
+  PreviewThumbnailSettings settings;
+  settings.fullExtent = QgsRectangle( -5, -5, 5, 5 );
+  settings.cameraDistance = 10;
+  settings.lightSourceTransform = QVector3D( 5, 15, 5 );
+
+  QVector<QgsPoint> pts;
+  if ( mRenderAsSimpleLines )
+  {
+    pts << QgsPoint( -1, -1, 0.01 ) << QgsPoint( -1, 1, 0.01 ) << QgsPoint( 1, 1, 0.01 ) << QgsPoint( 1, -1, 0.01 )
+        << QgsPoint( 1, -1, 2 ) << QgsPoint( 1, 1, 2 ) << QgsPoint( -1, 1, 2 ) << QgsPoint( -1, -1, 2 );
+    settings.cameraTarget.set( 0, mHeight + 1, 0 );
+  }
+  else
+  {
+    pts << QgsPoint( -1, -1, 0.01 ) << QgsPoint( -1, 1, 0.01 ) << QgsPoint( 1, 1, 0.01 ) << QgsPoint( 1, -1, 0.01 );
+    settings.cameraTarget.set( 0, mHeight + mExtrusionHeight / 2.0, 0 );
+  }
+  settings.geometry = QgsGeometry( new QgsLineString( pts ) );
+
+  return settings;
 }
 
 QgsAbstract3DSymbol *QgsLine3DSymbol::create()

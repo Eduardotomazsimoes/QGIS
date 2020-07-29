@@ -109,6 +109,7 @@ class Dummy3DSymbol : public QgsAbstract3DSymbol
     void readXml( const QDomElement &elem, const QgsReadWriteContext & ) override { id = elem.attribute( QStringLiteral( "id" ) ); }
     void writeXml( QDomElement &elem, const QgsReadWriteContext & ) const override { elem.setAttribute( QStringLiteral( "id" ), id ); }
     QList<QgsWkbTypes::GeometryType> compatibleGeometryTypes() const override { return QList< QgsWkbTypes::GeometryType >() << QgsWkbTypes::PointGeometry << QgsWkbTypes::LineGeometry; }
+    PreviewThumbnailSettings thumbnailSettings() const override { return PreviewThumbnailSettings(); }
 
     QString id;
 

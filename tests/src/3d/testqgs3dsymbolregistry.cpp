@@ -31,6 +31,7 @@ class Dummy3DSymbol : public QgsAbstract3DSymbol
     QgsAbstract3DSymbol *clone() const override { return new Dummy3DSymbol(); }
     void writeXml( QDomElement &, const QgsReadWriteContext & ) const override {}
     void readXml( const QDomElement &, const QgsReadWriteContext & ) override {}
+    PreviewThumbnailSettings thumbnailSettings() const override { return PreviewThumbnailSettings(); }
 
     static QgsAbstract3DSymbol *create() { return new Dummy3DSymbol(); }
 

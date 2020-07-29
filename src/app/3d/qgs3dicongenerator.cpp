@@ -27,6 +27,7 @@
 #include "qgscameracontroller.h"
 #include "qgsmultipolygon.h"
 #include "qgspolygon.h"
+#include "qgsmemoryproviderutils.h"
 
 Qgs3DIconGenerator::Qgs3DIconGenerator( QObject *parent )
   : QgsAbstractStyleEntityIconGenerator( parent )
@@ -56,74 +57,8 @@ void Qgs3DIconGenerator::generateIcon( const Qgs3DIconGenerator::IconRequest &re
 {
   std::unique_ptr< QgsAbstract3DSymbol > symbol( request.style->symbol3D( request.name ) );
 
-  QgsRectangle fullExtent( 0, 0, 1000, 1000 );
-
-  QgsVectorLayer *tempLayer = nullptr;
-
-  if ( symbol->type() == QStringLiteral( "line" ) )
-  {
-    tempLayer = new QgsVectorLayer( "LineString?crs=EPSG:27700", "lines", "memory" );
-    QVector<QgsPoint> pts;
-    pts << QgsPoint( 0, 0, 10 ) << QgsPoint( 0, 1000, 10 ) << QgsPoint( 1000, 1000, 10 ) << QgsPoint( 1000, 0, 10 );
-    pts << QgsPoint( 1000, 0, 500 ) << QgsPoint( 1000, 1000, 500 ) << QgsPoint( 0, 1000, 500 ) << QgsPoint( 0, 0, 500 );
-    QgsFeature f1( tempLayer->fields() );
-    f1.setGeometry( QgsGeometry( new QgsLineString( pts ) ) );
-    QgsFeatureList flist;
-    flist << f1;
-    tempLayer->dataProvider()->addFeatures( flist );
-  }
-  else if ( symbol->type() == QStringLiteral( "polygon" ) )
-  {
-    tempLayer = new QgsVectorLayer( "MultiPolygonZ?crs=EPSG:27700", "polygons", "memory" );
-
-    QgsMultiPolygon mp;
-    mp.addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( 0, 0, 0 )
-                                    << QgsPoint( 0, 1000, 0 )
-                                    << QgsPoint( 1000, 1000, 0 )
-                                    << QgsPoint( 1000, 0, 0 )
-                                    << QgsPoint( 0, 0, 0 ) ) ) );
-    mp.addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( 0, 0, 0 )
-                                    << QgsPoint( 0, 1000, 0 )
-                                    << QgsPoint( 0, 1000, 500 )
-                                    << QgsPoint( 0, 0, 500 )
-                                    << QgsPoint( 0, 0, 0 ) ) ) );
-    mp.addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( 0, 0, 0 )
-                                    << QgsPoint( 1000, 0, 0 )
-                                    << QgsPoint( 1000, 0, 500 )
-                                    << QgsPoint( 0, 0, 500 )
-                                    << QgsPoint( 0, 0, 0 ) ) ) );
-    mp.addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( 0, 1000, 0 )
-                                    << QgsPoint( 1000, 1000, 0 )
-                                    << QgsPoint( 1000, 1000, 500 )
-                                    << QgsPoint( 0, 1000, 500 )
-                                    << QgsPoint( 0, 1000, 0 ) ) ) );
-    mp.addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( 1000, 0, 0 )
-                                    << QgsPoint( 1000, 1000, 0 )
-                                    << QgsPoint( 1000, 1000, 500 )
-                                    << QgsPoint( 1000, 0, 500 )
-                                    << QgsPoint( 1000, 0, 0 ) ) ) );
-    mp.addGeometry( new QgsPolygon( new QgsLineString( QVector< QgsPoint >() << QgsPoint( 0, 0, 500 )
-                                    << QgsPoint( 0, 1000, 500 )
-                                    << QgsPoint( 1000, 1000, 500 )
-                                    << QgsPoint( 1000, 0, 500 )
-                                    << QgsPoint( 0, 0, 500 ) ) ) );
-
-    QgsFeature f1( tempLayer->fields() );
-    f1.setGeometry( QgsGeometry( mp.clone() ) );
-    QgsFeatureList flist;
-    flist << f1;
-    tempLayer->dataProvider()->addFeatures( flist );
-  }
-  else if ( symbol->type() == QStringLiteral( "point" ) )
-  {
-    tempLayer = new QgsVectorLayer( "PointZ?crs=EPSG:27700", "lines", "memory" );
-    QgsFeature f1( tempLayer->fields() );
-    f1.setGeometry( QgsGeometry( new QgsPoint( 500, 500, 200 ) ) );
-    QgsFeatureList flist;
-    flist << f1;
-    tempLayer->dataProvider()->addFeatures( flist );
-  }
-  else
+  const QgsAbstract3DSymbol::PreviewThumbnailSettings thumbnailSettings = symbol->thumbnailSettings();
+  if ( thumbnailSettings.geometry.isNull() )
   {
     mPendingRequests.removeAll( request );
     if ( mPendingRequests.empty() )
@@ -133,26 +68,36 @@ void Qgs3DIconGenerator::generateIcon( const Qgs3DIconGenerator::IconRequest &re
     return;
   }
 
+  QgsVectorLayer *tempLayer = QgsMemoryProviderUtils::createMemoryLayer( QString(), QgsFields(), thumbnailSettings.geometry.wkbType() );
+  QgsFeature f1( tempLayer->fields() );
+  f1.setGeometry( thumbnailSettings.geometry );
+  tempLayer->dataProvider()->addFeature( f1 );
+
   tempLayer->setRenderer3D( new QgsVectorLayer3DRenderer( symbol.release() ) );
 
   Qgs3DMapSettings *map = new Qgs3DMapSettings;
   map->setCrs( tempLayer->crs() );
-  map->setOrigin( QgsVector3D( fullExtent.center().x(), fullExtent.center().y(), 0 ) );
+  map->setOrigin( QgsVector3D( thumbnailSettings.fullExtent.center().x(), thumbnailSettings.fullExtent.center().y(), 0 ) );
   map->setLayers( QList<QgsMapLayer *>() << tempLayer );
+  map->setBackgroundColor( thumbnailSettings.backgroundColor );
   QgsPointLightSettings light;
-  light.setPosition( QVector3D( 1500, 1000, 1300 ) );
+  light.setPosition( thumbnailSettings.lightSourceTransform );
   map->setPointLights( QList< QgsPointLightSettings >() << light );
+  map->setShowLightSourceOrigins( true );
 
   QgsFlatTerrainGenerator *flatTerrain = new QgsFlatTerrainGenerator;
   flatTerrain->setCrs( map->crs() );
-  flatTerrain->setExtent( fullExtent );
+  flatTerrain->setExtent( thumbnailSettings.fullExtent );
   map->setTerrainGenerator( flatTerrain );
+  QgsPhongMaterialSettings terrainMaterial;
+  terrainMaterial.setDiffuse( thumbnailSettings.planeColor );
+  map->setTerrainShadingEnabled( true );
+  map->setTerrainShadingMaterial( terrainMaterial );
 
   QgsOffscreen3DEngine *engine = new QgsOffscreen3DEngine();
   Qgs3DMapScene *scene = new Qgs3DMapScene( *map, engine );
   engine->setRootEntity( scene );
-  scene->cameraController()->setLookingAtPoint( QgsVector3D( 0, 0, 0 ), 2500, 45, 45 );
-  engine->setClearColor( QColor( 0, 100, 0 ) );
+  scene->cameraController()->setLookingAtPoint( thumbnailSettings.cameraTarget, thumbnailSettings.cameraDistance, thumbnailSettings.cameraPitch, thumbnailSettings.cameraYaw );
 
   const QList< QSize > sizes = iconSizes();
   if ( sizes.isEmpty() )
